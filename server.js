@@ -13,7 +13,9 @@ const helmet = require('helmet');
 const {xss} = require('express-xss-sanitizer');
 const hpp = require('hpp');
 const cors = require('cors');
-const swaggerJSDoc = require('swagger-jsdoc');
+
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
 
 dotenv.config({path:'./config/config.env'});
 //connect to db
@@ -72,12 +74,10 @@ const swaggerOptions={
     apis:['./routes/*.js'],
 };
 
-const swaggerDocs=swaggerJSDoc(swaggerOptions);
-app.use('/api-docs', swaggerUI.serve,swaggerUI.setup(swaggerDocs));
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
-process.on('unhandledRejection',(err,prommise)=>{
+process.on('unhandledRejection',(err,promise)=> {
     console.log(`Error: ${err.message}`);
-
     server.close(()=>process.exit(1));
-
 })
