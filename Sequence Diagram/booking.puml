@@ -1,0 +1,129 @@
+@startuml
+
+actor User
+actor Admin
+participant "server.js" as Server
+participant "<<middleware>>\auth" as AuthMiddleware
+participant "<<controllers>>\booking" as BookingController
+participant "<<models>>\Booking" as BookingModel
+database "MongoDB\n:bookings" as MongoDB
+
+User -> Server: Send "Create Booking"
+activate Server
+Server -> AuthMiddleware: Call <<middleware>> auth middleware
+activate AuthMiddleware
+AuthMiddleware -> BookingController: addBooking()
+activate BookingController
+BookingController -> BookingModel: Booking.create()
+activate BookingModel
+BookingModel -> MongoDB: Insert new booking
+activate MongoDB
+MongoDB --> BookingModel: Confirmation
+deactivate MongoDB
+BookingModel --> BookingController: Created booking
+deactivate BookingModel
+BookingController --> Server: Response with created booking
+deactivate BookingController
+AuthMiddleware --> Server: Continue handling
+
+User -> Server: Send "Get all user's bookings"
+activate Server
+Server -> AuthMiddleware: Call <<middleware>> auth middleware
+activate AuthMiddleware
+AuthMiddleware -> BookingController: getBookings()
+activate BookingController
+BookingController -> BookingModel: Booking.find(user)
+activate BookingModel
+BookingModel --> BookingController: List of user's bookings
+deactivate BookingModel
+BookingController --> Server: Response with user's bookings
+deactivate BookingController
+AuthMiddleware --> Server: Continue handling
+
+User -> Server: Send "Update user's booking"
+activate Server
+Server -> AuthMiddleware: Call <<middleware>> auth middleware
+activate AuthMiddleware
+AuthMiddleware -> BookingController: updateBooking()
+activate BookingController
+BookingController -> BookingModel: Booking.findByIdAndUpdate()
+activate BookingModel
+BookingModel -> MongoDB: Update booking in database
+activate MongoDB
+MongoDB --> BookingModel: Confirmation
+deactivate MongoDB
+BookingModel --> BookingController: Updated user's booking
+deactivate BookingModel
+BookingController --> Server: Response with updated user's booking
+deactivate BookingController
+AuthMiddleware --> Server: Continue handling
+
+User -> Server: Send "Delete user's booking"
+activate Server
+Server -> AuthMiddleware: Call <<middleware>> auth middleware
+activate AuthMiddleware
+AuthMiddleware -> BookingController: deleteBooking()
+activate BookingController
+BookingController -> BookingModel: Booking.findByIdAndDelete()
+activate BookingModel
+BookingModel -> MongoDB: Delete booking from database
+activate MongoDB
+MongoDB --> BookingModel: Confirmation
+deactivate MongoDB
+BookingModel --> BookingController: Deleted user's booking
+deactivate BookingModel
+BookingController --> Server: Response with deleted user's booking
+deactivate BookingController
+AuthMiddleware --> Server: Continue handling
+
+Admin -> Server: Send "View all bookings"
+activate Server
+Server -> AuthMiddleware: Call <<middleware>> auth middleware
+activate AuthMiddleware
+AuthMiddleware -> BookingController: getBookings()
+activate BookingController
+BookingController -> BookingModel: Booking.find()
+activate BookingModel
+BookingModel --> BookingController: List of bookings
+deactivate BookingModel
+BookingController --> Server: Response with all bookings
+deactivate BookingController
+AuthMiddleware --> Server: Continue handling
+
+Admin -> Server: Send "Update user booking"
+activate Server
+Server -> AuthMiddleware: Call <<middleware>> auth middleware
+activate AuthMiddleware
+AuthMiddleware -> BookingController: updateBooking()
+activate BookingController
+BookingController -> BookingModel: Booking.findByIdAndUpdate()
+activate BookingModel
+BookingModel -> MongoDB: Update booking in database
+activate MongoDB
+MongoDB --> BookingModel: Confirmation
+deactivate MongoDB
+BookingModel --> BookingController: Updated user booking
+deactivate BookingModel
+BookingController --> Server: Response with updated user booking
+deactivate BookingController
+AuthMiddleware --> Server: Continue handling
+
+Admin -> Server: Send "Delete user booking"
+activate Server
+Server -> AuthMiddleware: Call <<middleware>> auth middleware
+activate AuthMiddleware
+AuthMiddleware -> BookingController: deleteBooking()
+activate BookingController
+BookingController -> BookingModel: Booking.findByIdAndDelete()
+activate BookingModel
+BookingModel -> MongoDB: Delete booking from database
+activate MongoDB
+MongoDB --> BookingModel: Confirmation
+deactivate MongoDB
+BookingModel --> BookingController: Deleted user booking
+deactivate BookingModel
+BookingController --> Server: Response with deleted user booking
+deactivate BookingController
+AuthMiddleware --> Server: Continue handling
+
+@enduml
