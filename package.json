@@ -22,7 +22,9 @@
     "helmet": "^7.1.0",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.2.3"
+    "mongoose": "^8.2.3",
+    "swagger": "^0.7.5",
+    "swagger-jsdoc": "^6.2.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
