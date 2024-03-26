@@ -43,9 +43,9 @@ app.use('/api/v1/auth',auth);
 app.use('/api/v1/bookings',bookings);
 
 
-app.get('/', (req,res) => {
-    res.status(200).json({success:true, data:{id:1}});
-});
+// app.get('/', (req,res) => {
+//     res.status(200).json({success:true, data:{id:1}});
+// });
 
 const PORT = process.env.PORT || 4000;
 
@@ -53,7 +53,7 @@ const server = app.listen(
     PORT, 
     console.log('Server running in ', 
     process.env.NODE_ENV,
-    ' on' + process.env.HOST + ":" + PORT
+    ' on ' + process.env.HOST + ":" + PORT
     )
 );
 
