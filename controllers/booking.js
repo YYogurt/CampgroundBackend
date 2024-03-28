@@ -1,7 +1,7 @@
 const Booking = require('../models/Booking') ;
 const Campground = require('../models/Campground') ;
 const {isPast} = require('date-fns');
-
+const { isToday } = require('date-fns');
 
 exports.getBookings = async (req,res,next)=>{
     let query ;
@@ -65,32 +65,34 @@ exports.addBooking = async (req, res, next) => {
         // Add user id to req body
         req.body.user = req.user.id;
 
+        
+        // ++Check if the booking date is in the past
+        const bookingDate = new Date(req.body.Date);
+        if (isPast(bookingDate) && !isToday(bookingDate)) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot create booking with a date in the past`
+            });
+        }
+        
+        // Check for existing bookings by the user
+        const existingBookingsByUser = await Booking.find({ user: req.user.id });
+        
+        // If the user is not an admin, they can only create 3 bookings
+        if (existingBookingsByUser.length >= 3 && req.user.role !== 'admin') {
+            return res.status(400).json({
+                success: false,
+                message: `You have already made 3 bookings.`
+            });
+        }
+
         // ++Check for existing bookings for the same campground and overlapping dates
         const existingBookings = await Booking.find({
             campground: req.params.campgroundId,
             Date: req.body.Date,
             });
-
-            // ++Check if the booking date is in the past
-             const bookingDate = new Date(req.body.Date);
-             if (isPast(bookingDate)) {
-                 return res.status(400).json({
-                     success: false,
-                     message: `Cannot create booking with a date in the past`
-                 });
-             }
-
-             // Check for existing bookings by the user
-             const existingBookingsByUser = await Booking.find({ user: req.user.id });
-     
-             // If the user is not an admin, they can only create 3 bookings
-             if (existingBookingsByUser.length >= 3 && req.user.role !== 'admin') {
-                 return res.status(400).json({
-                     success: false,
-                     message: `The user with ID ${req.user.id} has already made 3 bookings.`
-                 });
-             }
-
+            
+        
         if (existingBookings.length > 0) {
             return res.status(400).json({
                 success: false,
@@ -108,6 +110,7 @@ exports.addBooking = async (req, res, next) => {
 
 exports.updateBooking = async (req, res, next) => {
     try {
+        console.log("updateBooking");
         let booking = await Booking.findById(req.params.id);
 
         if (!booking) {
@@ -125,7 +128,7 @@ exports.updateBooking = async (req, res, next) => {
         // ++Check if the updated booking date is in the past
         if (req.body.Date) {
             const updatedBookingDate = new Date(req.body.Date);
-            if (isPast(updatedBookingDate)) {
+            if (isPast(updatedBookingDate) && !isToday(updatedBookingDate)) {
                 return res.status(400).json({
                     success: false,
                     message: `Cannot update booking with a date in the past`
@@ -135,11 +138,11 @@ exports.updateBooking = async (req, res, next) => {
 
         // ++Check for existing bookings for the same campground and date
         const existingBookings = await Booking.find({
-            campground: booking.campground,
-            Date: req.body.Date,
+            campground: req.body.campground,
+            Date: new Date(req.body.Date),
             _id: { $ne: req.params.id } // Exclude the current booking being updated
         });
-
+        console.log("this is existing booking : ",existingBookings);
         if (existingBookings.length > 0) {
             return res.status(400).json({
                 success: false,
